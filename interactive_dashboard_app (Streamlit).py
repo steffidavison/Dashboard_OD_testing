@@ -11,7 +11,7 @@ st.set_page_config(layout="wide")
 # === Load Data ===
 @st.cache_data
 def load_data():
-    return pd.read_excel("Final_results_08.05.2025.xlsx")
+    return pd.read_excel("data.xlsx")
 
 df = load_data()
 
