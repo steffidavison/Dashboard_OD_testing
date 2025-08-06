@@ -1,6 +1,4 @@
-# Updated Streamlit script to add a timepoint dropdown to select OD600 values at different timepoints or residual glucose
 
-updated_streamlit_script = """
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -85,11 +83,3 @@ with st.expander("Show Raw Data"):
 with st.expander("Model Coefficients"):
     st.write("Intercept:", model.intercept_)
     st.write("Coefficients:", dict(zip([x_axis, y_axis], model.coef_)))
-"""
-
-# Save updated script
-updated_script_path = "/mnt/data/interactive_dashboard_with_timepoint.py"
-with open(updated_script_path, "w") as f:
-    f.write(updated_streamlit_script)
-
-updated_script_path
