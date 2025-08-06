@@ -1,10 +1,11 @@
+# Updated Streamlit script to add a timepoint dropdown to select OD600 values at different timepoints or residual glucose
 
+updated_streamlit_script = """
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
-from math import log
 
 st.set_page_config(layout="wide")
 
@@ -15,19 +16,28 @@ def load_data():
 
 df = load_data()
 
-# === User Inputs ===
+# === Sidebar Controls ===
 st.sidebar.title("Controls")
+
 experiment_options = df['Experiment'].dropna().unique()
 selected_experiment = st.sidebar.selectbox("Choose Experiment", experiment_options)
 
-model_type = st.sidebar.selectbox("Model Type", ["Main Effects", "Main + 2FI (Mock)"])
+model_type = st.sidebar.selectbox("Model Type", ["Main Effects"])
 
 x_axis = st.sidebar.selectbox("X Variable", ["Glucose_%", "Methionine_mM", "Ethanol_%", "pH", "YNB_x"])
 y_axis = st.sidebar.selectbox("Y Variable", ["pH", "Methionine_mM", "Ethanol_%", "Glucose_%", "YNB_x"])
 
-response = st.sidebar.selectbox("Response", ["Calculated OD600 to Nanodrop", "Residual glucose (mg/l)"])
+# === Timepoint Selector ===
+response_map = {
+    "OD 8h": "OD_8h",
+    "OD 16h": "Calculated OD600 to Nanodrop",
+    "OD 24h": "OD_24h",
+    "Residual Glucose 16h": "Residual glucose (mg/l)"
+}
+response_label = st.sidebar.selectbox("Response Timepoint", list(response_map.keys()))
+response = response_map[response_label]
 
-# === Subset and clean ===
+# === Filter and Clean ===
 df_sub = df[df['Experiment'] == selected_experiment].copy()
 df_sub = df_sub[[x_axis, y_axis, response]].dropna()
 
@@ -38,7 +48,6 @@ if df_sub.shape[0] < 10:
 # === Model Fit ===
 X = df_sub[[x_axis, y_axis]]
 y = df_sub[response]
-
 model = LinearRegression().fit(X, y)
 
 x_range = np.linspace(X[x_axis].min(), X[x_axis].max(), 30)
@@ -57,16 +66,15 @@ fig = go.Figure(data=[go.Surface(
 )])
 
 fig.update_layout(
-    title=f"Predicted {response} Surface for {selected_experiment}",
+    title=f"Predicted {response_label} Surface for {selected_experiment}",
     scene=dict(
         xaxis_title=x_axis,
         yaxis_title=y_axis,
-        zaxis_title=response
+        zaxis_title=response_label
     ),
     height=800
 )
 
-# === Display ===
 st.plotly_chart(fig, use_container_width=True)
 
 # === Raw Table ===
@@ -77,3 +85,11 @@ with st.expander("Show Raw Data"):
 with st.expander("Model Coefficients"):
     st.write("Intercept:", model.intercept_)
     st.write("Coefficients:", dict(zip([x_axis, y_axis], model.coef_)))
+"""
+
+# Save updated script
+updated_script_path = "/mnt/data/interactive_dashboard_with_timepoint.py"
+with open(updated_script_path, "w") as f:
+    f.write(updated_streamlit_script)
+
+updated_script_path
